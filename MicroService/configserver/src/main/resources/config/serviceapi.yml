@@ -1,0 +1,41 @@
+server:
+  port: 0
+#  port: 8012
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true # 유레카 서비스에 (자신을) 등록 여부
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    registryFetchIntervalSeconds: 30 # eureka에게 서비스 정보를 가져오는 주기
+    disable-delta: true # eureka에게 서비스 정보를 가져올때 변경된 내용만 가져온다. (false로 하면 전체를 가져오기에 대역폭 낭비이다.)
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      failureRateThreshold: 50 # 실패율 임계값, 이 비율을 초과하면 Circuit Breaker가 열립니다.
+      slowCallRateThreshold: 100 # 느린 호출 비율 임계값, 이 비율을 초과하면 Circuit Breaker가 열립니다.
+      slowCallDurationThreshold: 3000 # 느린 호출 지속 기간 임계값, 이 기간을 초과하는 호출이 있으면 Circuit Breaker가 열립니다.
+      slidingWindowType: COUNT_BASED # 슬라이딩 윈도우 유형입니다 (COUNT_BASED 또는 TIME_BASED).
+      slidingWindowSize: 10 # 슬라이딩 윈도우 크기
+      minimumNumberOfCalls: 3 # Circuit Breaker가 활성화되기 위해 필요한 최소 호출 수
+      waitDurationInOpenState: 10000 # 오픈 상태에서의 대기 기간
+      permittedNumberOfCallsInHalfOpenState: 4 # Half-Open 상태에서 허용되는 호출 수
+      maxWaitDurationInHalfOpenState: 1000 # Half-Open 상태에서의 최대 대기 기간
+  instances:
+    customCircuitBreaker:
+      baseConfig: default
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    root: info
+  config: classpath:log4j2.xml
